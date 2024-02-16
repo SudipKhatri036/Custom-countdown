@@ -15,6 +15,7 @@ let countdownTitle = "";
 let countdownDate = "";
 let countdownValue = Date;
 let countdownActive;
+let savedCountdown;
 
 const second = 1000;
 const minute = second * 60;
@@ -32,14 +33,11 @@ function updateUi() {
 
     const distance = countdownValue - now;
 
-    console.log("distance", distance);
-
     const days = Math.floor(distance / day);
     const hours = Math.floor((distance % day) / hour);
     const minutes = Math.floor((distance % hour) / minute);
     const seconds = Math.floor((distance % minute) / second);
 
-    console.log(days, hours, minutes, seconds);
     //   Hide InputContainer
     inputcontainer.hidden = true;
 
@@ -71,12 +69,30 @@ function updateCountdown(e) {
   countdownTitle = e.srcElement[0].value;
   countdownDate = e.srcElement[1].value;
 
-  countdownValue = new Date(countdownDate).getTime();
-  console.log(countdownDate, countdownTitle);
-  console.log("countdown Time:", countdownValue);
+  savedCountdown = {
+    title: countdownTitle,
+    date: countdownDate,
+  };
+
+  localStorage.setItem("countdown", JSON.stringify(savedCountdown));
+
   if (countdownDate === "") {
     alert("Please enter a date for countdown");
   } else {
+    countdownValue = new Date(countdownDate).getTime();
+    updateUi();
+  }
+}
+
+// Showprevious countdown
+
+function showPreviousCountdown() {
+  if (localStorage.getItem("countdown")) {
+    inputcontainer.hidden = true;
+    savedCountdown = JSON.parse(localStorage.getItem("countdown"));
+    countdownTitle = savedCountdown.title;
+    countdownDate = savedCountdown.date;
+    countdownValue = new Date(countdownDate).getTime();
     updateUi();
   }
 }
@@ -92,8 +108,12 @@ function reset() {
   // reset values
   countdownTitle = "";
   countdownDate = "";
+  localStorage.removeItem("countdown");
 }
 
 countdownForm.addEventListener("submit", updateCountdown);
 countdownBtn.addEventListener("click", reset);
 completeBtn.addEventListener("click", reset);
+
+// On load
+showPreviousCountdown();
